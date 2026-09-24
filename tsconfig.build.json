@@ -1,0 +1,7 @@
+{
+  // The build view of tsconfig.json: identical compiler settings, minus the
+  // co-located *.test.ts files — dist/ ships template code only.
+  // (Jest/ts-jest and editors use tsconfig.json, which includes the tests.)
+  "extends": "./tsconfig.json",
+  "exclude": ["dist", "node_modules", "src/**/*.test.ts", "src/__testutils__/**"]
+}

@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "repo": {
+    "repoId": "@rainier",
+    "displayName": "Rainier",
+    "schemaVersion": 1,
+    "description": "A shared template repo for artists testing m0saic: layouts lifted from real short-form posts, rebuilt as templates you fill with your own clips, song and lyrics. Add it in Mosaic Desktop (Templates -> Add source) and new templates arrive with each update.",
+    "curator": "Rainier",
+    "homepage": "https://github.com/m0saic-project/rainier",
+    "assets": {
+      "templatesDir": "assets/templates"
+    },
+    "helloWorld": "@rainier/basics/hello-world/v1"
+  },
+  "entryModule": "./dist/index.js",
+  "templates": [
+    {
+      "slug": "hello-world",
+      "templateKey": "@rainier/basics/hello-world/v1",
+      "title": "01 · Hello World",
+      "description": "The canonical m0saic hello-world card with this repo's subline: the brand field wipes in, a navy card rises, the M assembles from its own rectangles, then the wordmark and your greeting. The repo's front door — what `m0saic hello-world --template-repo .` renders. Replace it with your first real template, or keep it and point repo.helloWorld at your own.",
+      "tags": [
+        "basics",
+        "starter",
+        "brand",
+        "hello"
+      ],
+      "pack": "basics",
+      "preview": {
+        "image": "assets/templates/@rainier__basics__hello-world__v1/preview.png",
+        "video": "assets/templates/@rainier__basics__hello-world__v1/preview.mp4",
+        "poster": "assets/templates/@rainier__basics__hello-world__v1/poster.png"
+      }
+    },
+    {
+      "slug": "lyric-triptych",
+      "templateKey": "@rainier/reels/lyric-triptych/v1",
+      "title": "02 · Lyric Triptych",
+      "description": "Three stacked video rows, your song, and word-by-word lyrics: tap each page of lyrics in time, then each word, and the words appear as you sing them. With an Instagram UI guide to see what the buttons cover.",
+      "tags": [
+        "reels",
+        "music",
+        "lyrics",
+        "musicians",
+        "creators",
+        "instagram",
+        "tiktok",
+        "vertical",
+        "animated"
+      ],
+      "pack": "reels",
+      "preview": {
+        "image": "assets/templates/@rainier__reels__lyric-triptych__v1/preview.png",
+        "video": "assets/templates/@rainier__reels__lyric-triptych__v1/preview.mp4",
+        "poster": "assets/templates/@rainier__reels__lyric-triptych__v1/poster.png"
+      }
+    }
+  ],
+  "packs": [
+    {
+      "id": "basics",
+      "title": "Basics",
+      "description": "The front door. The real templates live in their own packs."
+    },
+    {
+      "id": "reels",
+      "title": "Reels",
+      "description": "Vertical 9:16 layouts for Instagram Reels, TikTok and Shorts: your clips, your song, your words."
+    }
+  ]
+}

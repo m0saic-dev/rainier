@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    // CommonJS matters here, and not just by habit: the desktop app reloads an
+    // external repo by evicting its require.cache subtree and re-importing the
+    // entry. That refreshes the WHOLE module graph for CJS. A true-ESM build
+    // ("module": "esnext" + "type": "module") can only ever have its entry file
+    // refreshed — Node cannot invalidate an already-imported ESM module — so
+    // edits in any other file would keep serving stale code until the app
+    // restarts. The loader warns when it sees an ESM entry.
+    "module": "commonjs",
+    "target": "es2019",
+    "moduleResolution": "Node10",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    // LF output on every platform so a Windows build and a mac build of the
+    // same source are byte-identical.
+    "newLine": "lf",
+    "types": ["node", "jest"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["dist", "node_modules"]
+}

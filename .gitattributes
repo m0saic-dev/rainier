@@ -1,0 +1,18 @@
+# LF everywhere so source and generated files match byte-for-byte across
+# Windows and macOS (tsconfig also sets "newLine": "lf"). Binaries opt out.
+* text=auto eol=lf
+*.png -text
+*.jpg -text
+*.jpeg -text
+*.gif -text
+*.mp4 -text
+*.m4v -text
+*.mov -text
+*.mkv -text
+*.webm -text
+*.mp3 -text
+*.wav -text
+*.woff -text
+*.woff2 -text
+*.ttf -text
+*.otf -text

@@ -19,7 +19,8 @@ templates show up when the repo updates.
 ### Lyric Triptych: the workflow
 
 1. **Song**: pick the track (an audio file, or a video whose sound you want).
-2. **Top / Middle / Bottom clip**: drop in a clip for each row. If the takes
+2. **Top / Middle / Bottom clip**: drag a video or photo from Finder straight
+   onto a row in the preview (or click the row / use the field). If the takes
    started recording at different moments, use *trim start* to line them up
    with the song. Use *framing* to choose which part of a tall clip stays in view.
 3. **Lyrics**: paste them one **page** per line. A page is the words that

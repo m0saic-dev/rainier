@@ -89,6 +89,7 @@ export const DEFAULT_LYRICS: MosaicTimedCue[] = [
 ];
 
 const ROW_NAMES = ["top", "middle", "bottom"] as const;
+const CLIP_PROPS = ["topClip", "middleClip", "bottomClip"] as const;
 /** Placeholder panels (no clip yet): three quiet tones, one per row. */
 const PLACEHOLDER_COLORS = ["#2A2238", "#1D2733", "#332228"] as const;
 
@@ -118,7 +119,8 @@ const title = (row: string) => `${row[0].toUpperCase()}${row.slice(1)}`;
 const clipProp = (row: string, order: number) => ({
   type: "media" as const,
   required: false,
-  description: `The ${row} row's clip (video or photo), cropped to fill the row. Empty = a placeholder panel.`,
+  description:
+    `The ${row} row's clip (video or photo), cropped to fill the row. Drag a file straight onto the row in the preview, or pick one here. Empty = a placeholder panel.`,
   meta: {
     control: { picker: "file" as const, accept: ["video" as const, "image" as const] },
     ui: { label: `${title(row)} clip`, order, primary: true },
@@ -379,10 +381,11 @@ export const LyricTriptychV1 = defineMosaicTemplate<LyricTriptychProps>({
       const p = clipPaths[i];
       const kind = clipKinds[i];
       return {
+        propKey: CLIP_PROPS[i],
         ...(p && kind ? { clip: { path: p, mediaType: kind, durationMs: metaOf(p)?.durationMs } } : {}),
         trimStartMs: Math.round(num(trims[i], 0, 0, 600) * 1000),
         focusY: num(framings[i], 0.5, 0, 1),
-        placeholder: { color: PLACEHOLDER_COLORS[i] as MosaicColor, label: `${name} clip · pick a video` },
+        placeholder: { color: PLACEHOLDER_COLORS[i] as MosaicColor, label: `${name} clip · drop a video here` },
       };
     }) as [Row, Row, Row];
 

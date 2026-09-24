@@ -121,7 +121,8 @@ function buildTriptych(args) {
         return (0, types_1.asAssetId)(id);
     };
     // ── row sources ─────────────────────────────────────────────────────────
-    const rowSource = (row, i) => {
+    const rowSource = (row, i) => (0, template_utils_1.bindProp)(rowContent(row, i), row.propKey);
+    const rowContent = (row, i) => {
         const inset = lattice.insetAt(i);
         if (!row.clip) {
             // Placeholder panel: the row colour with a quiet label, one text tile.

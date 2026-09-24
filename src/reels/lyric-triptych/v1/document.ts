@@ -9,7 +9,7 @@ import type {
 } from "@m0saic/types";
 import { asAssetId } from "@m0saic/types";
 import { parseM0StringToRenderFrames, validateM0String } from "@m0saic/dsl";
-import { latticeCellInset, slugifyAssetKeyFromPath } from "@m0saic/template-utils";
+import { bindProp, latticeCellInset, slugifyAssetKeyFromPath } from "@m0saic/template-utils";
 
 import { FONT_METRICS } from "./font-metrics";
 import type { LyricPage } from "./pages";
@@ -29,6 +29,13 @@ import { typesetPage } from "./typeset";
  *   3[ row, row{ glow{ words{ glow{ words … }}}}, row ]{ reelsUi{ song } }
  *        └ the lyric row carries the word layers, chunked ≤ 300 per source
  *
+ * Every row tile is BOUND to its clip prop (a `media` binding), filled or
+ * not: in Make the row is a drop target (drag a video or photo onto it) and
+ * a click opens the picker. Make looks THROUGH unbound tiles stacked on top
+ * (the lyric layers, the Reels UI, the song leaf) to the row beneath, so
+ * only the rows carry bindings — never the song, whose leaf covers the
+ * whole canvas and would swallow every drop.
+ *
  * Each word is ONE drawtext layer: its own x (measured), its own baseline
  * (`y = baseline − ascent` — drawtext's `ascent` is the word's own glyph
  * height, so words with and without ascenders share one baseline), its own
@@ -38,6 +45,8 @@ import { typesetPage } from "./typeset";
  */
 
 export type Row = {
+  /** The `media` prop this row shows; its tile is bound to it (drop target). */
+  propKey: string;
   /** Absent → a placeholder panel telling the artist what goes here. */
   clip?: { path: string; mediaType: "video" | "image"; durationMs?: number };
   trimStartMs: number;
@@ -216,7 +225,8 @@ export function buildTriptych(args: TriptychArgs): TriptychPlan {
   };
 
   // ── row sources ─────────────────────────────────────────────────────────
-  const rowSource = (row: Row, i: number): MosaicSource => {
+  const rowSource = (row: Row, i: number): MosaicSource => bindProp(rowContent(row, i), row.propKey);
+  const rowContent = (row: Row, i: number): MosaicSource => {
     const inset = lattice.insetAt(i);
     if (!row.clip) {
       // Placeholder panel: the row colour with a quiet label, one text tile.

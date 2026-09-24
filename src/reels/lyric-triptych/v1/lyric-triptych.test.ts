@@ -4,6 +4,7 @@ import type { MosaicDocument, MosaicEngineContext, MosaicTextSource } from "@m0s
 import { asAssetId } from "@m0saic/types";
 import { parseM0StringToRenderFrames, validateM0String } from "@m0saic/dsl";
 import { evaluateM0 } from "@m0saic/dsl-stdlib";
+import { resolvePropBindings } from "@m0saic/template-utils";
 
 import { asDocument, targetCtx } from "../../../__testutils__/render";
 import { LAYERS_PER_SOURCE } from "./document";
@@ -100,6 +101,23 @@ describe("@rainier/reels/lyric-triptych/v1", () => {
       mediaType: "image",
       placement: { fit: "contain" },
     });
+  });
+
+  it("binds each row to its clip prop, empty or filled, so Make takes a dropped file", async () => {
+    for (const props of [{}, { topClip: CLIP, middleClip: CLIP, bottomClip: CLIP, song: SONG, showReelsUi: true }]) {
+      const doc = await render(props);
+      const { byProp, rejected } = resolvePropBindings(doc, W, H, { propsSchema: LyricTriptychV1.propsSchema });
+      expect(rejected).toEqual([]);
+      expect(Object.keys(byProp).sort()).toEqual(["bottomClip", "middleClip", "topClip"]);
+      const rows = parseM0StringToRenderFrames(String(doc.m0), W, H);
+      ["topClip", "middleClip", "bottomClip"].forEach((key, i) => {
+        expect(byProp[key]).toHaveLength(1);
+        // The binding sits on the row tile itself (y of row i), under the lyrics.
+        const src = doc.sources.find((s) => s.editor?.binding?.propKey === key);
+        const frame = rows[doc.sources.indexOf(src as (typeof doc.sources)[number])];
+        expect(frame.y).toBe((H / 3) * i);
+      });
+    }
   });
 
   it("moves the lyrics to another row", async () => {

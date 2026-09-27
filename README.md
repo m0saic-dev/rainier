@@ -37,6 +37,14 @@ templates show up when the repo updates.
    they will cover. It is drawn *into* the render, so **turn it off before you
    export**.
 
+7. **Word layout → custom** (optional): every word becomes its own box in the
+   preview. Scrub to a page, then drag a word to move it or pull its corner to
+   resize it (a bigger box makes a bigger word). Your boxes are saved in
+   *Word positions*; clear that field to put every word back. Set text size
+   and alignment **first**, because moved words stay where you put them. If you
+   add or remove words later, the saved positions are ignored and every word
+   returns to the template layout.
+
 Style knobs: lyrics row, alignment (justified by default), word entrance
 (rise / fade / instant), text size and colour, glow amount and colour (black
 turns the glow into a soft shadow for bright footage), and the border between

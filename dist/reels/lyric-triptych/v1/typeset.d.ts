@@ -23,7 +23,7 @@ export type PlacedWord = {
     text: string;
     /** Left edge of the word's pen box (drawtext `x`), px in the cell. */
     x: number;
-    /** Baseline, px in the cell (drawtext `y` = baseline − ascent). */
+    /** Baseline, px in the cell (drawtext `y` = baseline − inkTop). */
     baseline: number;
     atMs: number;
 };
@@ -37,6 +37,14 @@ export type TypesetPage = {
 export declare const LINE_HEIGHT = 1.28;
 /** Advance width of `text` at `fontPx`, kerning included. */
 export declare function measureText(text: string, fontPx: number): number;
+/**
+ * Height of `text`'s tallest glyph above the baseline, px. drawtext places a
+ * string by the TOP of its tallest glyph, so `y = baseline − inkTop` puts
+ * every word on one baseline — as a plain number, which Make's live preview
+ * can evaluate (drawtext's own `ascent` variable it cannot). Verified
+ * pixel-identical to `baseline-ascent` at 62–160 px (±1 px at small sizes).
+ */
+export declare function inkTop(text: string, fontPx: number): number;
 /**
  * Lay one page into `box`: the largest size on the ladder at which every
  * word fits the width and every line fits the height (the floor size wins

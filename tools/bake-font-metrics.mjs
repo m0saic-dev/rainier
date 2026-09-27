@@ -78,6 +78,16 @@ for (const ch of "‘’‚“”„–—…•·′″€") chars.push(ch);
 
 const glyphs = chars.map((ch) => [ch, font.charToGlyph(ch)]).filter(([, g]) => g && g.index !== 0);
 const advances = Object.fromEntries(glyphs.map(([ch, g]) => [ch, g.advanceWidth]));
+// Ink top of each glyph above the baseline (font units). drawtext positions a
+// string by the top of its tallest glyph, so a word's top is the max of these
+// — what lets a template write a plain-number `y` instead of `…-ascent`
+// (which only ffmpeg can evaluate; Make's live preview cannot).
+const tops = Object.fromEntries(
+  glyphs.map(([ch, g]) => {
+    const bb = g.getBoundingBox();
+    return [ch, Number.isFinite(bb.y2) ? Math.round(bb.y2) : 0];
+  }),
+);
 const kerning = {};
 for (const [a, ga] of glyphs) {
   for (const [b, gb] of glyphs) {
@@ -106,11 +116,13 @@ export const FONT_METRICS = {
   /** Advance for a character the table does not cover (≈ the "o"). */
   fallbackAdvance: ${advances.o ?? Math.round(font.unitsPerEm * 0.56)},
   advances: ${JSON.stringify(advances)} as Record<string, number>,
+  /** Ink top above the baseline per character (font units). */
+  tops: ${JSON.stringify(tops)} as Record<string, number>,
   kerning: ${JSON.stringify(kerning)} as Record<string, number>,
 } as const;
 `;
 fs.writeFileSync(OUT, body);
 console.log(
   `bake-font-metrics: ${FONT.family} ${FONT.subfamily} -> ${path.relative(ROOT, OUT)} ` +
-    `(${Object.keys(advances).length} advances, ${Object.keys(kerning).length} kerning pairs)`,
+    `(${Object.keys(advances).length} advances + ink tops, ${Object.keys(kerning).length} kerning pairs)`,
 );

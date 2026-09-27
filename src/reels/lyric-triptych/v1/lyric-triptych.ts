@@ -13,11 +13,13 @@ import {
   determineMediaType,
   makeErrorMosaic,
   parseCueTrackValue,
+  parseRegionsValue,
   resolveOutputDurationMs,
+  resolveRegionsToPx,
 } from "@m0saic/template-utils";
 
-import type { Row, TriptychStyle, WordEntrance } from "./document";
-import { buildTriptych } from "./document";
+import type { Row, TriptychStyle, WordEntrance, WordLayout } from "./document";
+import { WORD_BOXES_PROP, buildTriptych } from "./document";
 import { resolvePages } from "./pages";
 import type { TextAlign } from "./typeset";
 
@@ -38,6 +40,10 @@ import type { TextAlign } from "./typeset";
  * Helvetica Neue metrics (tools/bake-font-metrics.mjs) — the font macOS
  * ships and drawtext draws. On a machine without Helvetica Neue the words
  * still show, but the spacing drifts.
+ *
+ * "Word layout: custom" trades render time for control: every word becomes
+ * its own box the artist can drag or resize in Make's preview (the boxes
+ * land in "Word positions"). The template layout stays the default.
  *
  * "Show Instagram UI" lays the Reels viewer chrome over the render (baked by
  * tools/bake-reels-ui.mjs) so you can see what the buttons and caption will
@@ -61,6 +67,8 @@ export type LyricTriptychProps = {
   borderPx?: number;
   borderColor?: string;
   outerBorder?: boolean;
+  wordLayout?: WordLayout;
+  wordBoxes?: unknown;
   topTrimSec?: number;
   middleTrimSec?: number;
   bottomTrimSec?: number;
@@ -106,6 +114,7 @@ const DEFAULTS = {
   borderPx: 6,
   borderColor: "#0A0A0A",
   outerBorder: false,
+  wordLayout: "template",
   topTrimSec: 0,
   middleTrimSec: 0,
   bottomTrimSec: 0,
@@ -301,12 +310,35 @@ const propsSchema = definePropsSchema<LyricTriptychProps>({
     description: "Also draw the border around the outside edges.",
     meta: { ui: { label: "Border around the edges", order: 16 } },
   },
-  topTrimSec: trimProp("top", 17),
-  middleTrimSec: trimProp("middle", 18),
-  bottomTrimSec: trimProp("bottom", 19),
-  topFraming: framingProp("top", 20),
-  middleFraming: framingProp("middle", 21),
-  bottomFraming: framingProp("bottom", 22),
+  wordLayout: {
+    type: "string",
+    required: false,
+    description:
+      "template: the words lay themselves out (fast). custom: every word becomes its own box you can drag or resize " +
+      "in the preview (bigger box = bigger word). Custom renders slower; set the text size and alignment first, " +
+      "because words you have placed stay where you put them.",
+    meta: {
+      constraints: { oneOf: ["template", "custom"] },
+      ui: { label: "Word layout", order: 17 },
+    },
+  },
+  [WORD_BOXES_PROP]: {
+    type: "json",
+    required: false,
+    description:
+      "Where each word sits, one box per word in reading order. Written for you when you drag or resize a word in " +
+      "the preview; clear it to put every word back. Ignored if the lyrics gain or lose words afterwards.",
+    meta: {
+      control: { picker: "regions", regions: { shapes: ["rect"] } },
+      ui: { label: "Word positions", order: 18, visibleWhen: { prop: "wordLayout", equals: "custom" } },
+    },
+  },
+  topTrimSec: trimProp("top", 19),
+  middleTrimSec: trimProp("middle", 20),
+  bottomTrimSec: trimProp("bottom", 21),
+  topFraming: framingProp("top", 22),
+  middleFraming: framingProp("middle", 23),
+  bottomFraming: framingProp("bottom", 24),
 });
 
 const pick = <T extends string>(value: unknown, allowed: readonly T[], fallback: T): T =>
@@ -400,7 +432,20 @@ export const LyricTriptychV1 = defineMosaicTemplate<LyricTriptychProps>({
       borderPx: Math.round(num(props.borderPx, DEFAULTS.borderPx, 0, 40)),
       borderColor: color(props.borderColor, DEFAULTS.borderColor, "borderColor"),
       outerBorder: props.outerBorder === true,
+      wordLayout: pick(props.wordLayout, ["template", "custom"] as const, "template"),
     };
+
+    // Custom layout: the artist's word boxes, canvas px (Make records the
+    // canvas it drew on; resolveRegionsToPx rescales onto this render).
+    let wordBoxes: Array<{ x: number; y: number; w: number; h: number } | null> | undefined;
+    if (style.wordLayout === "custom") {
+      const regions = parseRegionsValue(props.wordBoxes);
+      if (regions.ok && regions.regions.length > 0) {
+        wordBoxes = resolveRegionsToPx(regions, { width: W, height: H }).map((r) =>
+          r.ok ? { x: r.x, y: r.y, w: r.w, h: r.h } : null,
+        );
+      }
+    }
 
     return buildTriptych({
       canvasW: W,
@@ -410,6 +455,9 @@ export const LyricTriptychV1 = defineMosaicTemplate<LyricTriptychProps>({
       rows,
       pages: resolvePages(parsed.cues, durationMs),
       style,
+      ...(wordBoxes ? { wordBoxes } : {}),
+      // Make's live preview (the design pass) is where words get dragged.
+      editable: ctx.mode === "design",
       ...(songPath ? { song: { path: songPath, mediaType: determineMediaType(songPath, ctx) } } : {}),
       ...(props.showReelsUi === true ? { reelsUiPath: REELS_UI_PNG } : {}),
     }).doc;

@@ -23,7 +23,7 @@ export type PlacedWord = {
   text: string;
   /** Left edge of the word's pen box (drawtext `x`), px in the cell. */
   x: number;
-  /** Baseline, px in the cell (drawtext `y` = baseline − ascent). */
+  /** Baseline, px in the cell (drawtext `y` = baseline − inkTop). */
   baseline: number;
   atMs: number;
 };
@@ -55,6 +55,20 @@ export function measureText(text: string, fontPx: number): number {
     if (i + 1 < chars.length) units += kerning[chars[i] + chars[i + 1]] ?? 0;
   }
   return units * unit(fontPx);
+}
+
+/**
+ * Height of `text`'s tallest glyph above the baseline, px. drawtext places a
+ * string by the TOP of its tallest glyph, so `y = baseline − inkTop` puts
+ * every word on one baseline — as a plain number, which Make's live preview
+ * can evaluate (drawtext's own `ascent` variable it cannot). Verified
+ * pixel-identical to `baseline-ascent` at 62–160 px (±1 px at small sizes).
+ */
+export function inkTop(text: string, fontPx: number): number {
+  const { tops, capHeight } = FONT_METRICS;
+  let top = 0;
+  for (const ch of Array.from(text)) top = Math.max(top, tops[ch] ?? capHeight);
+  return Math.round(top * unit(fontPx));
 }
 
 /** Width of the space between two words (kerning on both sides of it). */

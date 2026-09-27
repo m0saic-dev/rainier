@@ -17,5 +17,7 @@ export declare const FONT_METRICS: {
     /** Advance for a character the table does not cover (≈ the "o"). */
     readonly fallbackAdvance: 574;
     readonly advances: Record<string, number>;
+    /** Ink top above the baseline per character (font units). */
+    readonly tops: Record<string, number>;
     readonly kerning: Record<string, number>;
 };

@@ -76,8 +76,18 @@ and `deprecated: { replacement }` on the old one.
   the bundled Roboto, so a word placed as its own layer must be measured with
   that font: `font-metrics.ts` (from `tools/bake-font-metrics.mjs`) holds
   Helvetica Neue advances + kerning, verified pixel-exact against drawtext.
-- **Baselines: `y = baseline-ascent`.** drawtext's `ascent` is the word's own
-  glyph height; a constant `y` puts "on" higher than "the".
+- **Baselines: `y = baseline − inkTop(word)`, a plain number.** drawtext
+  places a string by its tallest glyph (a constant `y` puts "on" higher than
+  "the"). `baseline-ascent` renders right but Make's live preview cannot
+  evaluate `ascent`, so it misplaces every word; `font-metrics.ts` carries each
+  glyph's ink top, and the numeric y is pixel-identical at 62–160 px.
+- **Editing handles vs render cost.** Make's editable preview renders the
+  template with `ctx.mode === "design"`; real renders use `"render"`. Custom
+  word layout emits one bound cell per word ONLY in design (so each word can
+  be dragged: `bindPropRect(src, "wordBoxes", i)` on a regions list), and
+  renders the same final positions through the drawtext path. One cell per
+  word in the real render measured ~5x slower (150 image inputs → the engine
+  split the composite into 3 passes + a stitch).
 - **Placement exprs are inlined verbatim**: no commas or colons in
   `xExpr`/`yExpr` (write clamps with `abs()`); `overlay.alpha`/`enable` are escaped.
 - **Draw text over its own colour at zero alpha** (`visual.backgroundColor:

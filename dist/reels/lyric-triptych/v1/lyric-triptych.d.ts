@@ -1,5 +1,5 @@
 import type { MosaicTimedCue } from "@m0saic/types";
-import type { WordEntrance } from "./document";
+import type { WordEntrance, WordLayout } from "./document";
 import type { TextAlign } from "./typeset";
 /**
  * `@rainier/reels/lyric-triptych/v1` — three stacked clips, your song, and
@@ -18,6 +18,10 @@ import type { TextAlign } from "./typeset";
  * Helvetica Neue metrics (tools/bake-font-metrics.mjs) — the font macOS
  * ships and drawtext draws. On a machine without Helvetica Neue the words
  * still show, but the spacing drifts.
+ *
+ * "Word layout: custom" trades render time for control: every word becomes
+ * its own box the artist can drag or resize in Make's preview (the boxes
+ * land in "Word positions"). The template layout stays the default.
  *
  * "Show Instagram UI" lays the Reels viewer chrome over the render (baked by
  * tools/bake-reels-ui.mjs) so you can see what the buttons and caption will
@@ -40,6 +44,8 @@ export type LyricTriptychProps = {
     borderPx?: number;
     borderColor?: string;
     outerBorder?: boolean;
+    wordLayout?: WordLayout;
+    wordBoxes?: unknown;
     topTrimSec?: number;
     middleTrimSec?: number;
     bottomTrimSec?: number;

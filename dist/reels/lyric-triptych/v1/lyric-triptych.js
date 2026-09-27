@@ -42,6 +42,7 @@ const DEFAULTS = {
     borderPx: 6,
     borderColor: "#0A0A0A",
     outerBorder: false,
+    wordLayout: "template",
     topTrimSec: 0,
     middleTrimSec: 0,
     bottomTrimSec: 0,
@@ -225,12 +226,33 @@ const propsSchema = (0, template_utils_1.definePropsSchema)({
         description: "Also draw the border around the outside edges.",
         meta: { ui: { label: "Border around the edges", order: 16 } },
     },
-    topTrimSec: trimProp("top", 17),
-    middleTrimSec: trimProp("middle", 18),
-    bottomTrimSec: trimProp("bottom", 19),
-    topFraming: framingProp("top", 20),
-    middleFraming: framingProp("middle", 21),
-    bottomFraming: framingProp("bottom", 22),
+    wordLayout: {
+        type: "string",
+        required: false,
+        description: "template: the words lay themselves out (fast). custom: every word becomes its own box you can drag or resize " +
+            "in the preview (bigger box = bigger word). Custom renders slower; set the text size and alignment first, " +
+            "because words you have placed stay where you put them.",
+        meta: {
+            constraints: { oneOf: ["template", "custom"] },
+            ui: { label: "Word layout", order: 17 },
+        },
+    },
+    [document_1.WORD_BOXES_PROP]: {
+        type: "json",
+        required: false,
+        description: "Where each word sits, one box per word in reading order. Written for you when you drag or resize a word in " +
+            "the preview; clear it to put every word back. Ignored if the lyrics gain or lose words afterwards.",
+        meta: {
+            control: { picker: "regions", regions: { shapes: ["rect"] } },
+            ui: { label: "Word positions", order: 18, visibleWhen: { prop: "wordLayout", equals: "custom" } },
+        },
+    },
+    topTrimSec: trimProp("top", 19),
+    middleTrimSec: trimProp("middle", 20),
+    bottomTrimSec: trimProp("bottom", 21),
+    topFraming: framingProp("top", 22),
+    middleFraming: framingProp("middle", 23),
+    bottomFraming: framingProp("bottom", 24),
 });
 const pick = (value, allowed, fallback) => typeof value === "string" && allowed.includes(value) ? value : fallback;
 const num = (value, fallback, min, max) => typeof value === "number" && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
@@ -308,7 +330,17 @@ exports.LyricTriptychV1 = (0, template_utils_1.defineMosaicTemplate)({
             borderPx: Math.round(num(props.borderPx, DEFAULTS.borderPx, 0, 40)),
             borderColor: color(props.borderColor, DEFAULTS.borderColor, "borderColor"),
             outerBorder: props.outerBorder === true,
+            wordLayout: pick(props.wordLayout, ["template", "custom"], "template"),
         };
+        // Custom layout: the artist's word boxes, canvas px (Make records the
+        // canvas it drew on; resolveRegionsToPx rescales onto this render).
+        let wordBoxes;
+        if (style.wordLayout === "custom") {
+            const regions = (0, template_utils_1.parseRegionsValue)(props.wordBoxes);
+            if (regions.ok && regions.regions.length > 0) {
+                wordBoxes = (0, template_utils_1.resolveRegionsToPx)(regions, { width: W, height: H }).map((r) => r.ok ? { x: r.x, y: r.y, w: r.w, h: r.h } : null);
+            }
+        }
         return (0, document_1.buildTriptych)({
             canvasW: W,
             canvasH: H,
@@ -317,6 +349,9 @@ exports.LyricTriptychV1 = (0, template_utils_1.defineMosaicTemplate)({
             rows,
             pages: (0, pages_1.resolvePages)(parsed.cues, durationMs),
             style,
+            ...(wordBoxes ? { wordBoxes } : {}),
+            // Make's live preview (the design pass) is where words get dragged.
+            editable: ctx.mode === "design",
             ...(songPath ? { song: { path: songPath, mediaType: (0, template_utils_1.determineMediaType)(songPath, ctx) } } : {}),
             ...(props.showReelsUi === true ? { reelsUiPath: exports.REELS_UI_PNG } : {}),
         }).doc;

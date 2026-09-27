@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LINE_HEIGHT = void 0;
 exports.measureText = measureText;
+exports.inkTop = inkTop;
 exports.typesetPage = typesetPage;
 const font_metrics_1 = require("./font-metrics");
 /** Line pitch as a multiple of the font size (measured off real posts ≈ 1.3). */
@@ -24,6 +25,21 @@ function measureText(text, fontPx) {
             units += (_b = kerning[chars[i] + chars[i + 1]]) !== null && _b !== void 0 ? _b : 0;
     }
     return units * unit(fontPx);
+}
+/**
+ * Height of `text`'s tallest glyph above the baseline, px. drawtext places a
+ * string by the TOP of its tallest glyph, so `y = baseline − inkTop` puts
+ * every word on one baseline — as a plain number, which Make's live preview
+ * can evaluate (drawtext's own `ascent` variable it cannot). Verified
+ * pixel-identical to `baseline-ascent` at 62–160 px (±1 px at small sizes).
+ */
+function inkTop(text, fontPx) {
+    var _a;
+    const { tops, capHeight } = font_metrics_1.FONT_METRICS;
+    let top = 0;
+    for (const ch of Array.from(text))
+        top = Math.max(top, (_a = tops[ch]) !== null && _a !== void 0 ? _a : capHeight);
+    return Math.round(top * unit(fontPx));
 }
 /** Width of the space between two words (kerning on both sides of it). */
 function spaceBetween(left, right, fontPx) {

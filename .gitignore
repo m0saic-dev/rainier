@@ -9,6 +9,7 @@ node_modules
 # template. This repo is public, so real people's media, names, handles and
 # lyrics never get committed. Keep refs here, locally.
 ref/
+.ai/
 
 # local render output
 test-output

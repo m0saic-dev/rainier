@@ -1,0 +1,11 @@
+#!/bin/sh
+# Rainier pre-commit: the template freeze, judged on the INDEX
+# (node tools/check-freeze.mjs --staged). A staged edit to a frozen file, a new
+# file inside a frozen template, or a manifest that drops a hash or restamps a
+# template's line fails the commit. New work passes.
+#
+# Opt in once per clone:  npm run hooks:install
+#                         (= git config core.hooksPath tools/githooks)
+# A release re-mint only ADDS to frozen.manifest.json, so it passes too.
+root=$(git rev-parse --show-toplevel) || exit 2
+exec node "$root/tools/check-freeze.mjs" --staged

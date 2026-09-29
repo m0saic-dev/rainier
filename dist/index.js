@@ -20,14 +20,17 @@ Object.defineProperty(exports, "TEMPLATE_PACKS", { enumerable: true, get: functi
 Object.defineProperty(exports, "TEMPLATE_REPO", { enumerable: true, get: function () { return repo_1.TEMPLATE_REPO; } });
 const basics_1 = require("./basics");
 const reels_1 = require("./reels");
+const explore_1 = require("./explore");
 /** The two exports every Mosaic host requires from a template repo. */
 exports.repo = repo_1.TEMPLATE_REPO;
 exports.templates = [
     ...basics_1.basicsTemplates,
     ...reels_1.reelsTemplates,
+    ...explore_1.exploreTemplates,
 ];
 // Library re-exports for anyone importing this repo as code. `export *`
 // ONLY for template modules — never pair `export * from "./x"` with a
 // named re-export of the same module (tsc double-require hazard).
 __exportStar(require("./basics"), exports);
 __exportStar(require("./reels"), exports);
+__exportStar(require("./explore"), exports);

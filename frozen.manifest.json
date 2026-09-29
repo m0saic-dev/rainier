@@ -1,0 +1,21 @@
+{
+  "release": "0.2.0",
+  "commit": "56bb8c3aad1896d64c3afebec1bb086438ab2f2e",
+  "mintedAt": "2026-09-27T20:18:03.948Z",
+  "note": "Frozen once shipped. `shipped` is the m0saic line each template folder shipped at (the conventions audit's shippedAt, compared as semver — never a date); `release` is the line of the mint that wrote this file, and a re-mint keeps every folder's line. A hashed file never changes again — comments included (byte hashes; render-time assets too). A fix is a new vN+1 folder; deprecate the old one from the pack barrel (`deprecated: { replacement }`) and point it at the new id. Minted from HEAD with `node tools/check-freeze.mjs --update --tag <m0saic line>` at a release, by the founder. See AGENTS.md.",
+  "hashVersion": 2,
+  "excluded": [],
+  "shipped": {
+    "src/basics/hello-world/v1": "0.2.0",
+    "src/reels/lyric-triptych/v1": "0.2.0"
+  },
+  "files": {
+    "src/basics/hello-world/v1/hello-world.ts": "019cc458460a9ea12f648b995f25879151b315f829fe953fd7b3cb4800389096",
+    "src/reels/lyric-triptych/v1/assets/reels-ui.png": "57f25ff1ca248c147c1fc1706be1748a242985cd0aa00060b65533fd7fe07683",
+    "src/reels/lyric-triptych/v1/document.ts": "dc40801e10e8b151d597a1570d61b14cc43e9f14b822a961a02223ff12d2d0ed",
+    "src/reels/lyric-triptych/v1/font-metrics.ts": "70196201cdca076e1b3105b62461e5b3d4af60473c63c843e98116e6e9ea45b0",
+    "src/reels/lyric-triptych/v1/lyric-triptych.ts": "140a5170664fd91c955df69c9d1f0117d10ec98e7d95e2f73536aa479171833a",
+    "src/reels/lyric-triptych/v1/pages.ts": "9d0fc95f0e847733ce654abdd6ac6ec4a4d472259b2fb862eebf0227ba941321",
+    "src/reels/lyric-triptych/v1/typeset.ts": "777eb1c5fd3fee5732c41d5cdc9e5c361f5bdd8abeadc862d92f31f71b2f9cac"
+  }
+}

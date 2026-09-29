@@ -6,7 +6,7 @@
     "schemaVersion": 1,
     "description": "A shared template repo for artists testing m0saic: layouts lifted from real short-form posts, rebuilt as templates you fill with your own clips, song and lyrics. Add it in Mosaic Desktop (Templates -> Add source) and new templates arrive with each update.",
     "curator": "Rainier",
-    "homepage": "https://github.com/m0saic-project/rainier",
+    "homepage": "https://github.com/m0saic-dev/rainier",
     "assets": {
       "templatesDir": "assets/templates"
     },
@@ -54,6 +54,98 @@
         "video": "assets/templates/@rainier__reels__lyric-triptych__v1/preview.mp4",
         "poster": "assets/templates/@rainier__reels__lyric-triptych__v1/poster.png"
       }
+    },
+    {
+      "slug": "take-cutter",
+      "templateKey": "@rainier/reels/take-cutter/v1",
+      "title": "03 · Take Cutter",
+      "description": "Drop your long rehearsal video, mark the takes you want on the timeline, and get each take as its own file, named with where it sits in the video (yourvideo_01m22s-01m37s.mp4). Keep them as filmed, or cut them to vertical 1080x1920 for posting straight away. No more scrubbing on the phone.",
+      "tags": [
+        "reels",
+        "clips",
+        "takes",
+        "cut",
+        "rehearsal",
+        "musicians",
+        "creators",
+        "video",
+        "multi-output"
+      ],
+      "pack": "reels",
+      "preview": {
+        "image": "assets/templates/@rainier__reels__take-cutter__v1/preview.png"
+      }
+    },
+    {
+      "slug": "lyric-stack",
+      "templateKey": "@rainier/reels/lyric-stack/v1",
+      "title": "04 · Lyric Stack",
+      "description": "One to four takes on screen, your song, and your lyrics landing word by word in the font you pick. Time the lyrics once against the whole song, set where this clip starts, drag any word anywhere, and export for Reels, TikTok and Shorts in one go. The platform guide shows only while you edit.",
+      "tags": [
+        "reels",
+        "music",
+        "lyrics",
+        "fonts",
+        "musicians",
+        "creators",
+        "instagram",
+        "tiktok",
+        "shorts",
+        "vertical",
+        "animated"
+      ],
+      "pack": "reels",
+      "preview": {
+        "image": "assets/templates/@rainier__reels__lyric-stack__v1/preview.png",
+        "video": "assets/templates/@rainier__reels__lyric-stack__v1/preview.mp4",
+        "poster": "assets/templates/@rainier__reels__lyric-stack__v1/poster.png"
+      }
+    },
+    {
+      "slug": "cover-shards",
+      "templateKey": "@rainier/explore/cover-shards/v1",
+      "title": "05 · Cover Shards",
+      "description": "Your cover art builds itself from its own tiles, each one landing on a beat you tap to the song, then your release line rises in underneath. A 9:16 teaser of about 6 seconds for release week. Experiment.",
+      "tags": [
+        "explore",
+        "experiment",
+        "cover",
+        "release",
+        "music",
+        "musicians",
+        "creators",
+        "vertical",
+        "animated"
+      ],
+      "pack": "explore",
+      "preview": {
+        "image": "assets/templates/@rainier__explore__cover-shards__v1/preview.png",
+        "video": "assets/templates/@rainier__explore__cover-shards__v1/preview.mp4",
+        "poster": "assets/templates/@rainier__explore__cover-shards__v1/poster.png"
+      }
+    },
+    {
+      "slug": "margins",
+      "templateKey": "@rainier/explore/margins/v1",
+      "title": "06 · Margins",
+      "description": "A photo of your handwritten lyric page, marked line by line as you sing: tap each line to the voice memo or the song, and a highlighter stroke, underline or hand-drawn box lands on it. The words stay yours; the template writes none. 9:16. Experiment.",
+      "tags": [
+        "explore",
+        "experiment",
+        "lyrics",
+        "songwriting",
+        "music",
+        "musicians",
+        "creators",
+        "vertical",
+        "animated"
+      ],
+      "pack": "explore",
+      "preview": {
+        "image": "assets/templates/@rainier__explore__margins__v1/preview.png",
+        "video": "assets/templates/@rainier__explore__margins__v1/preview.mp4",
+        "poster": "assets/templates/@rainier__explore__margins__v1/poster.png"
+      }
     }
   ],
   "packs": [
@@ -66,6 +158,11 @@
       "id": "reels",
       "title": "Reels",
       "description": "Vertical 9:16 layouts for Instagram Reels, TikTok and Shorts: your clips, your song, your words."
+    },
+    {
+      "id": "explore",
+      "title": "Explore",
+      "description": "Experiments you may find useful: small, a little quirky, each one framing something you already have (the cover art, a lyric page, a rehearsal clip)."
     }
   ]
 }

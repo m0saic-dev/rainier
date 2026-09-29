@@ -14,6 +14,11 @@ ref/
 # local render output
 test-output
 
+# agent scratch (review scripts: node .scratch/claude/<topic>-review.mjs) and
+# local Python envs (tooling only, never shipped)
+.scratch/
+.venv/
+
 # OS files
 .DS_Store
 Thumbs.db

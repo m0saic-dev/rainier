@@ -13,12 +13,16 @@
  * template stays deterministic and ships no font file (metrics only).
  *
  * macOS-only dev tool (reads /System/Library/Fonts/HelveticaNeue.ttc). The
- * output is committed; hosts never run this.
+ * output is committed; hosts never run this. It refuses to write a file that
+ * frozen.manifest.json hashes, or into a frozen template (the default --out,
+ * the Lyric Triptych v1's font-metrics.ts, is frozen): pass --out.
  */
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
+
+import { frozenWriteReason } from "./freeze-manifest.mjs";
 
 const require = createRequire(import.meta.url);
 const opentype = require("opentype.js");
@@ -30,6 +34,12 @@ const OUT = path.resolve(
   ROOT,
   outArg >= 0 ? argv[outArg + 1] : "src/reels/lyric-triptych/v1/font-metrics.ts",
 );
+
+const frozenReason = frozenWriteReason(ROOT, OUT);
+if (frozenReason) {
+  console.error(`bake-font-metrics: refusing to write: ${frozenReason}. A shipped template never changes; write a new version's table with --out <file.ts>.`);
+  process.exit(1);
+}
 
 const FONT = { family: "Helvetica Neue", subfamily: "Regular", file: "/System/Library/Fonts/HelveticaNeue.ttc" };
 

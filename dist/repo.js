@@ -23,7 +23,7 @@ exports.TEMPLATE_REPO = {
     schemaVersion: 1,
     description: "A shared template repo for artists testing m0saic: layouts lifted from real short-form posts, rebuilt as templates you fill with your own clips, song and lyrics. Add it in Mosaic Desktop (Templates -> Add source) and new templates arrive with each update.",
     curator: "Rainier",
-    homepage: "https://github.com/m0saic-project/rainier",
+    homepage: "https://github.com/m0saic-dev/rainier",
     assets: { templatesDir: "assets/templates" },
     // The front door — the template a newcomer renders first (the hello-world
     // convention): the canonical card with this repo's subline. Point it at
@@ -44,5 +44,11 @@ exports.TEMPLATE_PACKS = [
         id: "reels",
         title: "Reels",
         description: "Vertical 9:16 layouts for Instagram Reels, TikTok and Shorts: your clips, your song, your words.",
+    },
+    // Keep `explore` LAST: its ordinals follow every production card.
+    {
+        id: "explore",
+        title: "Explore",
+        description: "Experiments you may find useful: small, a little quirky, each one framing something you already have (the cover art, a lyric page, a rehearsal clip).",
     },
 ];

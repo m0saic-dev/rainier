@@ -32,12 +32,21 @@ const ANIMATED_PREVIEW_IDS = new Set([
   "@rainier/basics/hello-world/v1",
   // Words landing one by one IS the template; a still can't show it.
   "@rainier/reels/lyric-triptych/v1",
+  // The same, over three placeholder takes.
+  "@rainier/reels/lyric-stack/v1",
+  // The shards flying in IS the experiment.
+  "@rainier/explore/cover-shards/v1",
+  // Each line lighting up as it is sung.
+  "@rainier/explore/margins/v1",
 ]);
 
 /** Clip dims per id; default 1920×1080 (previews look like the product). */
 const CLIP_DIMS = new Map([
   // A 9:16 Reel, at a size that keeps the 12 s clip light.
   ["@rainier/reels/lyric-triptych/v1", ["720", "1280"]],
+  ["@rainier/reels/lyric-stack/v1", ["720", "1280"]],
+  ["@rainier/explore/cover-shards/v1", ["720", "1280"]],
+  ["@rainier/explore/margins/v1", ["720", "1280"]],
 ]);
 /** Where to cut a from-video still, in seconds; default 0.8 (40% into the
  *  CLI's 2s default — past a leading transition, before a trailing one). A
@@ -46,6 +55,12 @@ const STILL_AT_SEC = new Map([
   ["@rainier/basics/hello-world/v1", 2.45],
   // Page 3 once all of its words have landed.
   ["@rainier/reels/lyric-triptych/v1", 7.0],
+  // Page 3 ("time the pages once against your whole song") fully landed.
+  ["@rainier/reels/lyric-stack/v1", 8.2],
+  // The grid settled and the title in.
+  ["@rainier/explore/cover-shards/v1", 5.5],
+  // Every line highlighted.
+  ["@rainier/explore/margins/v1", 9.5],
 ]);
 /** Ids whose still must be CUT from the mp4 rather than rendered directly.
  *  Two different reasons, both landing here:
@@ -65,6 +80,10 @@ const STILL_FROM_VIDEO = new Set([
   "@rainier/basics/hello-world/v1",
   // (2) words land over time — t=0 shows the first word only.
   "@rainier/reels/lyric-triptych/v1",
+  "@rainier/reels/lyric-stack/v1",
+  // (2) t=0 is one shard on black; t=0 has no highlight yet.
+  "@rainier/explore/cover-shards/v1",
+  "@rainier/explore/margins/v1",
 ]);
 const FFMPEG = process.env.M0SAIC_FFMPEG || "ffmpeg";
 
@@ -95,6 +114,8 @@ const MULTI_OUTPUT_STEP = new Map([
 /** Per-id preview canvas when 1920x1080 misrepresents the template — or
  *  (media units showing real video frames) busts the PNG budget. */
 const PREVIEW_DIMS = new Map([
+  // A 9:16 card with nothing moving at its defaults (no video yet): a still only.
+  ["@rainier/reels/take-cutter/v1", ["720", "1280"]],
 ]);
 
 /** Per-id overrides when the default flags don't fit (e.g. multi-output

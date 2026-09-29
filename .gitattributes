@@ -16,3 +16,4 @@
 *.woff2 -text
 *.ttf -text
 *.otf -text
+*.xlsx -text

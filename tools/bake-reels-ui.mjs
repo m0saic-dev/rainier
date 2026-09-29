@@ -4,7 +4,13 @@
  * action rail, caption block) as ONE transparent 1080x1920 PNG a template can
  * lay over its render while you edit.
  *
- *   node tools/bake-reels-ui.mjs [--svg]   (--svg also writes the .svg beside it)
+ *   node tools/bake-reels-ui.mjs [--out-dir <dir>] [--svg]   (--svg also writes the .svg beside it)
+ *
+ * FROZEN OUTPUT. The default --out-dir is the Lyric Triptych v1's assets/, and
+ * that template is frozen (frozen.manifest.json hashes its reels-ui.png): the
+ * tool refuses to write there, or anywhere inside a frozen template. Point
+ * --out-dir at a new template version's assets/ (a triptych v2), or use
+ * tools/bake-platform-ui.mjs for the shared platform guides.
  *
  * Geometry was measured from screenshots of a Reel on a 6.3" iPhone (1206x2622
  * screen, the Reel filling the 1206x2365 area above the comment bar) and
@@ -21,11 +27,27 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
+import { frozenWriteReason } from "./freeze-manifest.mjs";
+
 const require = createRequire(import.meta.url);
 const sharp = require("sharp");
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const OUT_DIR = path.join(ROOT, "src/reels/lyric-triptych/v1/assets");
+const outDirArg = process.argv.indexOf("--out-dir");
+const outDirValue = outDirArg >= 0 ? process.argv[outDirArg + 1] : undefined;
+if (outDirArg >= 0 && (!outDirValue || outDirValue.startsWith("--"))) {
+  // A bare --out-dir used to resolve to the repo root and drop reels-ui.png there.
+  console.error("bake-reels-ui: --out-dir needs a folder, e.g. --out-dir src/reels/<slug>/v2/assets");
+  process.exit(1);
+}
+const OUT_DIR = path.resolve(ROOT, outDirValue ?? "src/reels/lyric-triptych/v1/assets");
+for (const file of ["reels-ui.png", ...(process.argv.includes("--svg") ? ["reels-ui.svg"] : [])]) {
+  const reason = frozenWriteReason(ROOT, path.join(OUT_DIR, file));
+  if (reason) {
+    console.error(`bake-reels-ui: refusing to write: ${reason}. A shipped template never changes; bake into a new version's assets/ (--out-dir) or use tools/bake-platform-ui.mjs.`);
+    process.exit(1);
+  }
+}
 const W = 1080;
 const H = 1920;
 /** Side strips a tall phone crops off a 9:16 video (px of the 1080-wide video). */

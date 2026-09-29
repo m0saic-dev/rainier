@@ -18,12 +18,28 @@
  * characters the font has). Templates whose required inputs have no default
  * are skipped, not failed.
  *
+ * Shipped templates and the conventions of their day: `frozen.manifest.json`
+ * (tools/check-freeze.mjs) hashes every shipped `src/<pack>/<slug>/vN/` and
+ * names the m0saic line EACH one shipped at (`shipped`, e.g. the triptych
+ * "0.2.0" and Lyric Stack "0.3.0"; a manifest without `shipped` ships them all
+ * at its `release`). Each id is audited with ITS OWN `{ shippedAt }`: a finding
+ * from a convention that landed AFTER that line (0.3.0's bindingsDeclared /
+ * canvasFill for a 0.2.0 template) comes back in `audit.lagging`, not
+ * `findings` — printed one line per template, never fatal; the fix is the
+ * template's next vN. A template frozen at 0.3.0 is held to 0.3.0's rules. A
+ * manifest with a line that is not MAJOR.MINOR.PATCH, or a hashed folder
+ * without a line, fails the gate closed (a date would compare as 2026.0.0 and
+ * lag nothing). On a template-utils without `shippedAt` (0.2.0) the option is
+ * ignored and nothing lags — behaviour is unchanged.
+ *
  * Same gate as the m0saic monorepo's `packages/templates/tools/check-registry.mjs`.
  */
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
+
+import { FREEZE_MANIFEST_FILE, assertReleaseShape, compareLines, readFreezeManifest, shippedFolderReleases, shippedReleasesFrom } from "./freeze-manifest.mjs";
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -58,6 +74,30 @@ const finish = (code) => {
   process.exit(code);
 };
 
+// ── The freeze manifest: which templates shipped, and at which m0saic line ──
+// Read before anything loads, and fail CLOSED on a bad one: without it the
+// gate cannot tell a shipped template (lag is allowed) from new work (held to
+// every current rule). No manifest = nothing shipped yet = every template is
+// held to the current conventions.
+let FREEZE_MANIFEST = null;
+try {
+  FREEZE_MANIFEST = readFreezeManifest(ROOT);
+  if (FREEZE_MANIFEST) {
+    assertReleaseShape(FREEZE_MANIFEST.release);
+    shippedFolderReleases(FREEZE_MANIFEST); // every hashed folder has a line, every line has the shape
+  }
+} catch (err) {
+  const message = err && err.message ? err.message : String(err);
+  report.conventions = { shippedAt: null, shipped: {}, lagging: [], error: message };
+  fail(`\n[check-registry] ✗ ${FREEZE_MANIFEST_FILE}: ${message}`);
+  fail("[check-registry] Failing closed: shipped templates cannot be told from new work. Restore the manifest from git; minting is a release act (node tools/check-freeze.mjs --update --tag <m0saic line>).");
+  finish(1);
+}
+// `shippedAt` in the report is the manifest's `release` (the newest line it
+// froze); `shipped` holds each template's own line, which is what the audit uses.
+const SHIPPED_AT = FREEZE_MANIFEST ? FREEZE_MANIFEST.release : null;
+report.conventions = { shippedAt: SHIPPED_AT, shipped: {}, lagging: [] };
+
 let templates;
 let templateUtils;
 try {
@@ -90,6 +130,19 @@ const count = Array.isArray(templates) ? templates.length : 0;
       templateUtils.makeTemplateConventionFinding(String(repo?.repoId ?? "(repo)"), "repoFrontDoor", violations, false),
     );
   }
+}
+// The ids the manifest hashes (`src/<pack>/<slug>/vN/…` → `<repoId>/<pack>/<slug>/vN`),
+// each with the m0saic line it shipped at.
+let SHIPPED = new Map();
+if (FREEZE_MANIFEST) {
+  const entry = require("../dist/index.js");
+  const repoId = (entry.repo ?? entry.TEMPLATE_REPO ?? null)?.repoId;
+  if (!repoId) {
+    fail(`[check-registry] ✗ ${FREEZE_MANIFEST_FILE} names shipped templates but dist/index.js exports no repo.repoId to name them with — failing closed.`);
+    finish(1);
+  }
+  SHIPPED = shippedReleasesFrom(FREEZE_MANIFEST, String(repoId));
+  report.conventions.shipped = Object.fromEntries(SHIPPED);
 }
 const printFindings = (label, findings) => {
   for (const f of findings) {
@@ -133,7 +186,14 @@ const skipped = [];
 const layouts = [];
 let rendered = 0;
 for (const template of templates) {
-  const audit = await templateUtils.auditRenderedTemplate(template, SWEEP ? { sweepCanvases: templateUtils.STANDARD_SWEEP_CANVASES } : {});
+  // `shippedAt` exempts a SHIPPED template from conventions newer than the line
+  // IT shipped at: those findings come back in `audit.lagging` (0.3.0+). A new
+  // template gets no `shippedAt` and meets every current rule.
+  const shippedAt = SHIPPED.get(String(template.id));
+  const audit = await templateUtils.auditRenderedTemplate(template, {
+    ...(SWEEP ? { sweepCanvases: templateUtils.STANDARD_SWEEP_CANVASES } : {}),
+    ...(shippedAt ? { shippedAt } : {}),
+  });
   if (audit.skipped) {
     skipped.push(`${audit.templateId}: ${audit.skipped}`);
     report.skipped.push({ templateId: audit.templateId, reason: audit.skipped });
@@ -141,6 +201,13 @@ for (const template of templates) {
   }
   rendered++;
   report.rendered = rendered;
+  const lag = audit.lagging ?? [];
+  if (lag.length) {
+    const conventions = [...new Set(lag.map((f) => f.convention))].sort();
+    const lines = conventions.map((c) => templateUtils.TEMPLATE_CONVENTION_SINCE?.[c]).filter((v) => typeof v === "string");
+    const behind = lines.sort(compareLines).pop() ?? templateUtils.conventionVersions?.().slice(-1)[0] ?? "the current line";
+    report.conventions.lagging.push({ templateId: audit.templateId ?? String(template.id), shippedAt: shippedAt ?? null, behind, conventions });
+  }
   if (audit.layout) layouts.push({ id: audit.templateId, layout: audit.layout });
   for (const f of audit.findings) { (f.severity === "error" ? errors2 : warnings2).push(f); (f.severity === "error" ? report.errors : report.warnings).push(toJson(f)); }
   for (const note of audit.notes) report.notes.push({ templateId: audit.templateId, note });
@@ -149,6 +216,11 @@ for (const template of templates) {
 if (warnings2.length) {
   warn(`[check-registry] ⚠ ${warnings2.length} render-time warning(s) (record posture — fix when you touch the template):`);
   printFindings("⚠", warnings2);
+}
+// Lag, not defects: a shipped template met the conventions of its day. One
+// line each, never fatal — this is the list the next vN pass works from.
+for (const l of report.conventions.lagging) {
+  say(`[check-registry] ℹ ${l.templateId}: behind ${l.behind} on ${l.conventions.join(", ")} - not a defect: shipped at ${l.shippedAt}; fix in the next vN`);
 }
 // ── Stage 3: layout fingerprints ───────────────────────────────────────────
 // The flattened layout at the hinted canvas, committed per template as a

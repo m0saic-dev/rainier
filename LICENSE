@@ -19,3 +19,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+Third-party fonts
+
+The font files (*.ttf) in src/_shared/assets/fonts/ and their copies in
+dist/_shared/assets/fonts/ are NOT covered by the MIT licence above. Each is
+licensed under the SIL Open Font License, Version 1.1; the licence for each
+family is the OFL-<Family>.txt file beside it, and
+src/_shared/assets/fonts/FONTS.md lists every face and its source.
